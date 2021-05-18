@@ -9,6 +9,7 @@ game played on this simulation.
 from cyberbattle.simulation import model as m
 from cyberbattle.simulation.model import NodeID, NodeInfo, VulnerabilityID, VulnerabilityInfo
 from typing import Dict, Iterator, cast, Tuple
+import json
 
 default_allow_rules = [
     m.FirewallRule("RDP", m.RulePermission.ALLOW),

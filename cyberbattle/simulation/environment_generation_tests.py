@@ -7,8 +7,8 @@
 from collections import Counter
 from typing import List, Dict
 import pytest
-from . import environment_generation
-from . import model
+import environment_generation
+import model
 
 windows_vulns: Dict[str, model.VulnerabilityInfo] = environment_generation.potential_windows_vulns
 linux_vulns: Dict[str, model.VulnerabilityInfo] = environment_generation.potential_linux_vulns

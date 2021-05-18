@@ -244,39 +244,13 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
 
     final_node_index = size + 1
 
-    nodes = {
-        'start': m.NodeInfo(
-            services=[],
-            value=0,
-            vulnerabilities=dict(
-                ScanExplorerRecentFiles=m.VulnerabilityInfo(
-                    description="Scan Windows Explorer recent files for possible references to other machines",
-                    type=m.VulnerabilityType.LOCAL,
-                    outcome=m.LeakedCredentials(credentials=[
-                        m.CachedCredential(node=prefix(1, "LinuxNode"), port="SSH",
-                                           credential=ssh_password(1))]),
-                    reward_string="Found a reference to a remote Linux node in bash history",
-                    cost=1.0
-                )),
-            agent_installed=True,
-            reimagable=False),
-
-        prefix(final_node_index, "LinuxNode"): m.NodeInfo(
-            services=[m.ListeningService("HTTPS"),
-                      m.ListeningService("SSH", allowedCredentials=[ssh_password(final_node_index)])],
-            value=1000,
-            owned_string="FLAG: flag discovered!",
-            properties=["MySql", "Ubuntu", "nginx/1.10.3", "FLAG:Linux"],
-            vulnerabilities=dict()
-        )
-    }
+    nodes = {}
 
     # Add chain links
     for i in range(1, size, 2):
         nodes.update(create_network_chain_link(i))
 
     return nodes
-
 
 def new_environment(size) -> m.Environment:
     return m.Environment(

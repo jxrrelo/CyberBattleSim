@@ -9,7 +9,7 @@ from typing import List, Dict, Set
 import random
 import re
 import networkx as nx
-from . import model
+import model
 
 # These two lists are lists of potential vulnerabilities. They are split into linux vulnerabilities
 # and Windows vulnerabilities so i can
@@ -96,7 +96,7 @@ potential_windows_vulns = {
 
     "SMBBF":
     model.VulnerabilityInfo(
-        description="SSH Brute Force",
+        description="SMB Brute Force",
         type=model.VulnerabilityType.REMOTE,
         URL="https://attack.mitre.org/techniques/T1110/",
         precondition=model.Precondition("(Windows|Linux)&PortSMBOpen"),
@@ -123,7 +123,7 @@ potential_linux_vulns = {
         rates=model.Rates(0, 0.2, 1.0)),
     "SMBBF":
     model.VulnerabilityInfo(
-        description="SSH Brute Force",
+        description="SMB Brute Force",
         type=model.VulnerabilityType.REMOTE,
         URL="https://attack.mitre.org/techniques/T1110/",
         precondition=model.Precondition("(Windows|Linux)&PortSMBOpen"),
