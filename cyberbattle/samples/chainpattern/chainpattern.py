@@ -246,11 +246,50 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
 
     nodes = {}
 
+    nodes.update(init_victim())
+    nodes.update(add_last_node(final_node_index))
+
     # Add chain links
     for i in range(1, size, 2):
         nodes.update(create_network_chain_link(i))
 
+    
+
     return nodes
+
+def init_victim():
+    return {
+        "Victim": m.NodeInfo(
+            services=[],
+            value=0,
+            properties=["Windows", "Win10", "Win10Patched"],
+            vulnerabilities=dict(
+                ScanExplorerRecentFiles=m.VulnerabilityInfo(
+                    description="Scan Windows Explorer recent files for possible references to other machines",
+                    type=m.VulnerabilityType.LOCAL,
+                    outcome=m.LeakedCredentials(credentials=[
+                        m.CachedCredential(node=prefix(1, "LinuxNode"), port="SSH",
+                                           credential=ssh_password(1))]),
+                    reward_string="Found a reference to a remote Linux node in bash history",
+                    cost=1.0
+                )
+            ),
+            agent_installed=True,
+            reimagable=False
+        )
+    }
+
+def add_last_node(index: int):
+    return {
+        prefix(index, "LinuxNode"): m.NodeInfo(
+            services=[m.ListeningService("HTTPS"),
+                      m.ListeningService("SSH", allowedCredentials=[ssh_password(index)])],
+            value=1000,
+            owned_string="FLAG: flag discovered!",
+            properties=["MySql", "Ubuntu", "nginx/1.10.3", "FLAG:Linux"],
+            vulnerabilities=dict()
+        )
+    }
 
 def new_environment(size) -> m.Environment:
     return m.Environment(
