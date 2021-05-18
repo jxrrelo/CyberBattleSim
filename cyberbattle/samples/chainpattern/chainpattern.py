@@ -253,16 +253,13 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
     for i in range(1, size, 2):
         nodes.update(create_network_chain_link(i))
 
-    
-
     return nodes
 
+#Victim machine information passed to this function from victim machine over TCP
 def init_victim():
     return {
-        "Victim": m.NodeInfo(
-            services=[],
-            value=0,
-            properties=["Windows", "Win10", "Win10Patched"],
+        REPLACE_NODE_ID: m.NodeInfo(
+            properties=[REPLACE_PROPERTIES],
             vulnerabilities=dict(
                 ScanExplorerRecentFiles=m.VulnerabilityInfo(
                     description="Scan Windows Explorer recent files for possible references to other machines",
