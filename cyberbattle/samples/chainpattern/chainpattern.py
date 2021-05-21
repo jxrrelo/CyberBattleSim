@@ -246,7 +246,7 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
 
     nodes = {}
 
-    nodes.update(init_victim())
+    nodes.update(add_victim())
     nodes.update(add_last_node(final_node_index))
 
     # Add chain links
@@ -256,10 +256,12 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
     return nodes
 
 #Victim machine information passed to this function from victim machine over TCP
-def init_victim():
+def add_victim():
     return {
-        REPLACE_NODE_ID: m.NodeInfo(
-            properties=[REPLACE_PROPERTIES],
+        "CONFIGURE_DATA": m.NodeInfo(
+            services=[CONFIGURE_DATA],
+            properties=["CONFIGURE_DATA"],
+            firewall=m.FirewallConfiguration(CONFIGURE_DATA),
             vulnerabilities=dict(
                 ScanExplorerRecentFiles=m.VulnerabilityInfo(
                     description="Scan Windows Explorer recent files for possible references to other machines",

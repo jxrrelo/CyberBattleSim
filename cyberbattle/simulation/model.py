@@ -274,6 +274,11 @@ class FirewallConfiguration(NamedTuple):
     Port that are not listed in the configuration
     are assumed to be blocked. (Adding an explicit block rule
     can still be useful to give a reason for the block.)
+
+    RDP - 3389
+    SSH - 22
+    HTTPS - 443
+    HTTP - 80
     """
     outgoing: List[FirewallRule] = [
         FirewallRule("RDP", RulePermission.ALLOW),
