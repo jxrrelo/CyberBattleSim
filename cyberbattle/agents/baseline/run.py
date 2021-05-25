@@ -59,6 +59,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.ERROR, format="%(levelname)
 
 print(f"torch cuda available={torch.cuda.is_available()}")
 
+#Nodes follow from initialisation in chainpattern.py
 cyberbattlechain = gym.make('CyberBattleChain-v0',
                             size=args.chain_size,
                             attacker_goal=cyberbattle_env.AttackerGoal(
@@ -114,8 +115,9 @@ if args.run_random_agent:
 colors = [asciichartpy.red, asciichartpy.green, asciichartpy.yellow, asciichartpy.blue]
 
 print("Episode duration -- DQN=Red, Random=Green")
-print(asciichartpy.plot(p.episodes_lengths_for_all_runs(all_runs), {'height': 30, 'colors': colors}))
+duration = p.episodes_lengths_for_all_runs(all_runs)
+print(asciichartpy.plot(duration, {'height': 30, 'colors': colors}))
 
 print("Cumulative rewards -- DQN=Red, Random=Green")
-c = p.averaged_cummulative_rewards(all_runs, args.rewardplot_with)
-print(asciichartpy.plot(c, {'height': 10, 'colors': colors}))
+rewards = p.averaged_cummulative_rewards(all_runs, args.rewardplot_with)
+print(asciichartpy.plot(rewards, {'height': 10, 'colors': colors}))

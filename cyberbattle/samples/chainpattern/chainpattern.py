@@ -246,7 +246,7 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
 
     nodes = {}
 
-    nodes.update(add_victim())
+    nodes.update(add_initial_node())
     nodes.update(add_last_node(final_node_index))
 
     # Add chain links
@@ -256,19 +256,23 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
     return nodes
 
 #Victim machine information passed to this function from victim machine over TCP
-def add_victim():
+def add_initial_node():
     return {
+        #"Victim": m.NodeInfo(
         "CONFIGURE_DATA": m.NodeInfo(
+            #services=[],
             services=[CONFIGURE_DATA],
+            #properties=["Windows", "Win10", "Win10Patched"],
             properties=["CONFIGURE_DATA"],
+            #firewall=m.FirewallConfiguration(incoming=[m.FirewallRule("SSH", m.RulePermission.BLOCK)], outgoing=DEFAULT_ALLOW_RULES),
             firewall=m.FirewallConfiguration(CONFIGURE_DATA),
             vulnerabilities=dict(
                 ScanExplorerRecentFiles=m.VulnerabilityInfo(
                     description="Scan Windows Explorer recent files for possible references to other machines",
                     type=m.VulnerabilityType.LOCAL,
                     outcome=m.LeakedCredentials(credentials=[
-                        m.CachedCredential(node=prefix(1, "LinuxNode"), port="SSH",
-                                           credential=ssh_password(1))]),
+                            m.CachedCredential(node=prefix(1, "LinuxNode"), port="SSH",
+                                               credential=ssh_password(1))]),
                     reward_string="Found a reference to a remote Linux node in bash history",
                     cost=1.0
                 )

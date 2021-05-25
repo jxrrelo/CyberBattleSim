@@ -145,6 +145,7 @@ class PlotTraining:
         self.title = title
         self.render_each_episode = render_each_episode
 
+    #Graph windows: Blue = Absolute values, Yellow = Cumsum, (UpperLim-LowerLim)/WindowSize
     def plot_durations(self, average_window=5):
         # plt.figure(2)
         plt.figure()
@@ -186,6 +187,9 @@ def reduce(x, desired_width):
     return [np.average(c) for c in np.array_split(x, desired_width)]
 
 
+#Pad all with zeroes to fixed length of max_iteration_count
+#Average across iteration x of all y episodes
+#Average the sum of every contiguous pair
 def episodes_rewards_averaged(run):
     """Plot cumulative rewards for a given set of specified episodes"""
     max_iteration_count = np.max([len(r) for r in run['all_episodes_rewards']])
