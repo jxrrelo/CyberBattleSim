@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #Executing this script reads data from standard input and directly configures
-#the code specified in configure_path and optionally calls the python script
-#specified in cbs_path
+#the code specified in CHAINPATTERN_PATH and optionally calls the python script
+#specified in RUNNER_PATH
 
 #echo "[-] Establishing connection..."
 #echo "[-] Connection established successfully with host"
@@ -19,8 +19,8 @@ RANDOM_PATH="/home/osboxes/CyberBattleSim/notebooks/chainnetwork-random.ipynb"
 RUNNER_PATH="/home/osboxes/CyberBattleSim/cyberbattle/agents/baseline/run.py"
 CHAINPATTERN_PATH="/home/osboxes/CyberBattleSim/cyberbattle/samples/chainpattern/chainpattern.py"
 
-declare -A dict
-dict=([21]="FTP" [22]="SSH" [80]="HTTP" [139]="SMB" [443]="HTTPS" [3389]="RDP")
+declare -A ports
+ports=([21]="FTP" [22]="SSH" [80]="HTTP" [139]="SMB" [443]="HTTPS" [3389]="RDP")
 
 TRAINING_EPISODE_COUNT=10
 EVAL_EPISODE_COUNT=10
@@ -35,16 +35,70 @@ numArgs=4
 
 #Execute random code on host machine
 execute_random() {
-	echo -e "[EXECUTING] chainnetwork-random.ipynb ..."
+	printf "[EXECUTING] chainnetwork-random.ipynb ...\n\n"
 	sleep 2
 	python3 -m notebook $RANDOM_PATH
 }
 
 #Execute DQL + Random runner code on host machine
 execute_runner() {
-	echo -e "[EXECUTING] runner.py ..."
+	printf "[EXECUTING] runner.py ...\n\n"
 	sleep 2
 	python3 $RUNNER_PATH --training_episode_count $TRAINING_EPISODE_COUNT --eval_episode_count $EVAL_EPISODE_COUNT --iteration_count $ITERATION_COUNT --rewardplot_with $REWARDPLOT_WITH --chain_size=$CHAIN_SIZE --ownership_goal $OWNERSHIP_GOAL
+}
+
+#Handler for Services field
+services_handler() {
+	declare -A creds
+	var=${arr[1]}
+	IFS=', ' read -r -a svcs <<< "$var"
+	str=""
+
+	for svc in "${svcs[@]}"; do
+		IFS='=' read -r -a temp <<< "$svc"
+		port=${temp[0]}
+		cred=${temp[1]}
+		if [ $cred ]; then
+			creds[portNum]=$cred
+		fi
+		protocol=${ports[$port]}
+
+		#Check protocol validity
+		if [ $protocol ]; then
+			str+="m.ListeningService(\"$protocol\""
+			if [ $cred ]; then
+				str+=", allowedCredentials=[\"$cred\"]),"
+			else
+				str+="), "
+			fi
+		fi
+	done
+
+	arr[1]=$str
+}
+
+#Handler for Firewall field
+firewall_handler() {
+	var=${arr[3]}
+	IFS=', ' read -r -a temp <<< "$var"
+	str=""
+	
+	for j in "${temp[@]}"; do
+		protocol=${ports[$j]}
+		#Check protocol validity
+		if [ -z $protocol ]; then
+			str+="m.FirewallRule(\"$protocol\", m.RulePermission.BLOCK), "
+		fi
+	done
+
+	arr[3]="incoming=[$str], outgoing=DEFAULT_ALLOW_RULES"
+}
+
+#Handler for Vulnerabilities field
+vuln_handler() {
+	var=${arr[4]}
+	IFS=', ' read -r -a temp <<< "$var"
+	str=""
 }
 
 #Entry point
@@ -57,45 +111,19 @@ start() {
 	#Iterate through and replace relevant fields
 	while [ $i -ne $numArgs ]; do
 		#Services Configuration
-		#modify to accept multiple
 		if [ $i = 1 ]; then
-			var=${arr[1]}
-			IFS=',' read -r -a temp <<< "$var"
-			str=""
-
-			for i in ${temp[@]}; do
-				protocol=$dict[$i]
-				#Check protocol validity
-				if [$protocol != ""]; then
-					str+="m.ListeningService(\"$protocol\"), "
-				fi
-			done
-		
-			arr[1]=$str
+			services_handler $arr
 		fi
 		
 		#Firewall Configuration
-		#modify to accept multiple
 		if [ $i = 3 ]; then
-			var=${arr[3]}
-			IFS=',' read -r -a temp <<< "$var"
-			str=""
-			
-			for i in ${temp[@]}; do
-				protocol=$dict[$i]
-				#Check protocol validity
-				if [$protocol != ""]; then
-					str+="m.FirewallRule(\"$protocol\", m.RulePermission.BLOCK), "
-				fi
-			done
-		
-			arr[3]="incoming=["+$str+"], outgoing=DEFAULT_ALLOW_RULES"
-		
+			firewall_handler $arr
 		fi
 
 		#Vulnerabilities Configuration
-		#if [ $i = 4 ]; then
-		#fi
+		if [ $i = 4 ]; then
+			vuln_handler $arr
+		fi
 
 		#Replacement of data
 		perl -0777 -i -pe "s/CONFIGURE_DATA/${arr[$i]}/" $CHAINPATTERN_PATH

@@ -47,6 +47,8 @@ sftp*-config.json
 *.zip
 /venv/**
 /.cache/**
+/logs
+/scripts/info.txt
 
 /.dmypy.json
 src/.dmypy.json

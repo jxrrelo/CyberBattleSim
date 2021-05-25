@@ -17,8 +17,10 @@ class Server:
         while True:
             self.socket.listen(1) #max 1 request and refuse connections
             conn, addr = self.socket.accept()
-            conn.send(b"[-] Establishing connection...\n")
-            conn.send(b"[-] Connection established successfully with host "
+            
+            if conn:
+                conn.send(b"[-] Establishing connection...\n")
+                conn.send(b"[-] Connection established successfully with host "
                 + b"(" + HOST.encode() + b", " + str(self.port).encode() + b")\n\n")
 
             while True:
@@ -28,9 +30,10 @@ class Server:
                 conn.send(b"Successfully Delivered: " + data + b"\n")
 
                 data_str = data.decode()
-                #f = open("%s.txt" % HOST, "a")
-                #f.write(data_str)
-                #f.close()
+                with open("../logs/%s.txt" % HOST, "w") as f:
+                    f.write(data_str)
+                f.close()
+                
                 cmd = "echo \'" + data_str + "\' | ./script.sh"
                 subprocess.call(cmd, shell=True)
         
