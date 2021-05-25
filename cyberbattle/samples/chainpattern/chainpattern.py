@@ -259,11 +259,11 @@ def create_chain_network(size: int) -> Dict[NodeID, NodeInfo]:
 def add_initial_node():
     return {
         #"Victim": m.NodeInfo(
-        "CONFIGURE_DATA": m.NodeInfo(
+        CONFIGURE_DATA: m.NodeInfo(
             #services=[],
             services=[CONFIGURE_DATA],
             #properties=["Windows", "Win10", "Win10Patched"],
-            properties=["CONFIGURE_DATA"],
+            properties=[CONFIGURE_DATA],
             #firewall=m.FirewallConfiguration(incoming=[m.FirewallRule("SSH", m.RulePermission.BLOCK)], outgoing=DEFAULT_ALLOW_RULES),
             firewall=m.FirewallConfiguration(CONFIGURE_DATA),
             vulnerabilities=dict(
