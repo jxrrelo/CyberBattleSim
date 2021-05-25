@@ -62,19 +62,35 @@ start() {
 			var=${arr[1]}
 			IFS=',' read -r -a temp <<< "$var"
 			str=""
-			for i in ${arr[@]}; do
-				
+
+			for i in ${temp[@]}; do
+				protocol=$dict[$i]
+				#Check protocol validity
+				if [$protocol != ""]; then
+					str+="m.ListeningService(\"$protocol\"), "
+				fi
 			done
-			
-			str+="m.ListeningService(\"${dict[$var]}\"), "
-			arr[1]="m.ListeningService(\"${dict[$var]}\"), "
+		
+			arr[1]=$str
 		fi
 		
 		#Firewall Configuration
 		#modify to accept multiple
 		if [ $i = 3 ]; then
 			var=${arr[3]}
-			arr[3]="incoming=[m.FirewallRule(\"${dict[$var]}\", m.RulePermission.BLOCK)], outgoing=DEFAULT_ALLOW_RULES"
+			IFS=',' read -r -a temp <<< "$var"
+			str=""
+			
+			for i in ${temp[@]}; do
+				protocol=$dict[$i]
+				#Check protocol validity
+				if [$protocol != ""]; then
+					str+="m.FirewallRule(\"$protocol\", m.RulePermission.BLOCK), "
+				fi
+			done
+		
+			arr[3]="incoming=["+$str+"], outgoing=DEFAULT_ALLOW_RULES"
+		
 		fi
 
 		#Vulnerabilities Configuration
