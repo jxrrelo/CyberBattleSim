@@ -22,6 +22,8 @@ CHAINPATTERN_PATH="/home/osboxes/CyberBattleSim/cyberbattle/samples/chainpattern
 declare -A ports
 ports=([21]="FTP" [22]="SSH" [80]="HTTP" [139]="SMB" [443]="HTTPS" [3389]="RDP")
 
+NUM_NODES=2
+NUM_ARGS=4
 TRAINING_EPISODE_COUNT=10
 EVAL_EPISODE_COUNT=10
 ITERATION_COUNT=100
@@ -30,25 +32,23 @@ CHAIN_SIZE=10
 OWNERSHIP_GOAL=1.0
 
 #Variables init
-i=0
-numArgs=4
 
 #Execute random code on host machine
-execute_random() {
+function execute_random {
 	printf "[EXECUTING] chainnetwork-random.ipynb ...\n\n"
 	sleep 2
 	python3 -m notebook $RANDOM_PATH
 }
 
 #Execute DQL + Random runner code on host machine
-execute_runner() {
+function execute_runner {
 	printf "[EXECUTING] runner.py ...\n\n"
 	sleep 2
 	python3 $RUNNER_PATH --training_episode_count $TRAINING_EPISODE_COUNT --eval_episode_count $EVAL_EPISODE_COUNT --iteration_count $ITERATION_COUNT --rewardplot_with $REWARDPLOT_WITH --chain_size=$CHAIN_SIZE --ownership_goal $OWNERSHIP_GOAL
 }
 
 #Handler for Services field
-services_handler() {
+function services_handler {
 	declare -A creds
 	var=${arr[1]}
 	IFS=', ' read -r -a svcs <<< "$var"
@@ -78,7 +78,7 @@ services_handler() {
 }
 
 #Handler for Firewall field
-firewall_handler() {
+function firewall_handler {
 	var=${arr[3]}
 	IFS=', ' read -r -a temp <<< "$var"
 	str=""
@@ -86,7 +86,7 @@ firewall_handler() {
 	for j in "${temp[@]}"; do
 		protocol=${ports[$j]}
 		#Check protocol validity
-		if [ -z $protocol ]; then
+		if [ $protocol ]; then
 			str+="m.FirewallRule(\"$protocol\", m.RulePermission.BLOCK), "
 		fi
 	done
@@ -95,43 +95,45 @@ firewall_handler() {
 }
 
 #Handler for Vulnerabilities field
-vuln_handler() {
+function vuln_handler {
 	var=${arr[4]}
 	IFS=', ' read -r -a temp <<< "$var"
 	str=""
 }
 
 #Entry point
-start() {
+function start {
 	#Read from stdin
-	read line
-	#String manipulate input and parse as array
-	IFS=':' read -r -a arr <<< "$line"
+	for ((count=0; count<$NUM_NODES; count++)); do
+		read line
+		i=0
+		#String manipulate input and parse as array
+		IFS=':' read -r -a arr <<< "$line"
 
-	#Iterate through and replace relevant fields
-	while [ $i -ne $numArgs ]; do
-		#Services Configuration
-		if [ $i = 1 ]; then
-			services_handler $arr
-		fi
-		
-		#Firewall Configuration
-		if [ $i = 3 ]; then
-			firewall_handler $arr
-		fi
+		#Iterate through and replace relevant fields
+		while [ $i -ne $NUM_ARGS ]; do
 
-		#Vulnerabilities Configuration
-		if [ $i = 4 ]; then
-			vuln_handler $arr
-		fi
+			#Manage Configurations
+			case $i in
+				1) 	#Services Configuration
+					services_handler $arr
+					;;
+				3)	#Firewall Configuration
+					firewall_handler $arr
+					;;
+				4)	#Vulnerabilities Configuration
+					vuln_handler $arr
+					;;
+			esac
 
-		#Replacement of data
-		perl -0777 -i -pe "s/CONFIGURE_DATA/${arr[$i]}/" $CHAINPATTERN_PATH
-		
-		#Increment i to loop over next iteration
-		i=$((i+1))
-	done
-	
+			#Replacement of data in chainpattern.py
+			perl -0777 -i -pe "s/CONFIGURE_DATA/${arr[$i]//\//\\/}/" $CHAINPATTERN_PATH
+			#sed -i "0,/CONFIGURE_DATA/s//${arr[$i]//\//\\/}/" $CHAINPATTERN_PATH
+
+			#Increment i to loop over next iteration
+			i=$((i+1))
+		done
+	done	
 	execute_runner
 }
 

@@ -282,6 +282,11 @@ def add_initial_node():
         )
     }
 
+CONFIGURE_DATA
+CONFIGURE_DATA
+CONFIGURE_DATA
+CONFIGURE_DATA
+
 def add_last_node(index: int):
     return {
         prefix(index, "LinuxNode"): m.NodeInfo(
