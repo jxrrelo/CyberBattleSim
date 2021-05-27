@@ -28,6 +28,7 @@ class Server:
                 print("Incoming: " + str(addr))
                 print("Message: " + data.decode() + "\n")
                 conn.send(b"Successfully Delivered: " + data + b"\n")
+                #Cleaner response can be done here
 
                 data_str = data.decode()
                 with open("../logs/%s.txt" % HOST, "w") as f:

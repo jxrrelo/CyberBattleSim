@@ -265,7 +265,7 @@ def add_initial_node():
             #properties=["Windows", "Win10", "Win10Patched"],
             properties=[CONFIGURE_DATA],
             #firewall=m.FirewallConfiguration(incoming=[m.FirewallRule("SSH", m.RulePermission.BLOCK)], outgoing=DEFAULT_ALLOW_RULES),
-            firewall=m.FirewallConfiguration(CONFIGURE_DATA),
+            firewall=m.FirewallConfiguration(CONFIGURE_DATA, CONFIGURE_DATA),
             vulnerabilities=dict(
                 ScanExplorerRecentFiles=m.VulnerabilityInfo(
                     description="Scan Windows Explorer recent files for possible references to other machines",
@@ -281,11 +281,6 @@ def add_initial_node():
             reimagable=False
         )
     }
-
-CONFIGURE_DATA
-CONFIGURE_DATA
-CONFIGURE_DATA
-CONFIGURE_DATA
 
 def add_last_node(index: int):
     return {
