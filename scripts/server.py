@@ -25,13 +25,14 @@ class Server:
 
             while True:
                 data = conn.recv(1024)
-                print("Incoming: " + str(addr))
+                targetAddr = str(addr)
+                print("Incoming: " + targetAddr)
                 print("Message: " + data.decode() + "\n")
                 conn.send(b"Successfully Delivered: " + data + b"\n")
                 #Cleaner response can be done here
 
                 data_str = data.decode()
-                with open("../logs/%s.txt" % HOST, "w") as f:
+                with open("../logs/%s.txt" % targetAddr.split("'")[1], "w") as f:
                     f.write(data_str)
                 f.close()
                 

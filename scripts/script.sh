@@ -9,18 +9,13 @@
 #info.txt example
 #"StartNode":443, 22=password:"Windows", "Win10", "Win10Patched":22, 80 
 
-#0 - NODE_ID: identifier[1]
-#1 - SERVICES: protocol[0...*], credentials[1]
-#2 - PROPERTIES: identifier[0...*]
-#3 - FIREWALL CONFIGURATION: incoming[0...*], outgoing[0...*]
-#4 - VULNERABILITIES: name[0...*]=>type, outcome, cost
-#5 - VALUE: value [1]
-
 #Global constants init
+#Paths
 RANDOM_PATH="/home/osboxes/CyberBattleSim/notebooks/chainnetwork-random.ipynb"
 RUNNER_PATH="/home/osboxes/CyberBattleSim/cyberbattle/agents/baseline/run.py"
 CHAINPATTERN_PATH="/home/osboxes/CyberBattleSim/cyberbattle/samples/chainpattern/chainpattern.py"
 
+#Others
 declare -A ports
 ports=(	[21]="FTP" \
 		[22]="SSH" \
@@ -32,7 +27,17 @@ ports=(	[21]="FTP" \
 		[443]="HTTPS" \
 		[3389]="RDP" )
 
+#0 - NODE_ID: identifier[1]
+#1 - SERVICES: protocol[0...*], credentials[1]
+#2 - PROPERTIES: identifier[0...*]
+#3 - FIREWALL CONFIGURATION: incoming[0...*], outgoing[0...*]
+#4 - VULNERABILITIES: name[0...*]=>type, outcome, cost
+#5 - VALUE: value [1] (not included yet)
 NUM_ARGS=5
+
+DEFAULT_GATEWAY=192.168.2.0/24
+
+#DQL
 TRAINING_EPISODE_COUNT=10
 EVAL_EPISODE_COUNT=10
 ITERATION_COUNT=100
@@ -61,6 +66,18 @@ function execute_runner {
 	--rewardplot_with $REWARDPLOT_WITH \
 	--chain_size=$CHAIN_SIZE \
 	--ownership_goal $OWNERSHIP_GOAL
+}
+
+function scan_num_hosts {
+	nmap -sP $DEFAULT_GATEWAY | grep -oE "[0-9] hosts up" | grep -oE "[0-9]"
+}
+
+function scan_open_ports {
+	nmap $TARGET_ADDRESS | grep -o "^[0-9]*/" | perl -p00e 's/\/\n(?!\Z)/, /g' | perl -pe 's/\///g'
+}
+
+function gather_info {
+	scan_open_ports
 }
 
 #Handler for Services field
@@ -134,9 +151,8 @@ function vuln_handler {
 	str=""
 }
 
-#Entry point
-function start {
-	#Read from stdin
+function process_info {
+	#Read from stdin until EOF
 	while [ "$line" ]; do
 		read line
 		i=0
@@ -174,4 +190,6 @@ function start {
 	execute_runner
 }
 
-start
+#Entry point
+gather_info
+process_info
