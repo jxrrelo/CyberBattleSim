@@ -22,9 +22,9 @@ ports=(	[21]="FTP" \
 		[23]="TELNET" \
 		[25]="SMTP" \
 		[80]="HTTP" \
-		[139]="SMB" \
 		[161]="SNMP" \
 		[443]="HTTPS" \
+		[445]="SMB" \
 		[3389]="RDP" )
 
 #0 - NODE_ID: identifier[1]
@@ -66,18 +66,6 @@ function execute_runner {
 	--rewardplot_with $REWARDPLOT_WITH \
 	--chain_size=$CHAIN_SIZE \
 	--ownership_goal $OWNERSHIP_GOAL
-}
-
-function scan_num_hosts {
-	nmap -sP $DEFAULT_GATEWAY | grep -oE "[0-9] hosts up" | grep -oE "[0-9]"
-}
-
-function scan_open_ports {
-	nmap $TARGET_ADDRESS | grep -o "^[0-9]*/" | perl -p00e 's/\/\n(?!\Z)/, /g' | perl -pe 's/\///g'
-}
-
-function gather_info {
-	scan_open_ports
 }
 
 #Handler for Services field
@@ -135,6 +123,7 @@ function firewall_out_handler {
 	
 	for j in "${temp[@]}"; do
 		protocol=${ports[$j]}
+		echo $protocol
 		#Check protocol validity
 		if [ $protocol ]; then
 			str+="m.FirewallRule(\"$protocol\", m.RulePermission.ALLOW), "
@@ -191,5 +180,4 @@ function process_info {
 }
 
 #Entry point
-gather_info
 process_info

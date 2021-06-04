@@ -26,17 +26,18 @@ class Server:
             while True:
                 data = conn.recv(1024)
                 targetAddr = str(addr)
-                print("Incoming: " + targetAddr)
+                print("Sender: " + targetAddr)
                 print("Message: " + data.decode() + "\n")
                 conn.send(b"Successfully Delivered: " + data + b"\n")
                 #Cleaner response can be done here
 
                 data_str = data.decode()
+
                 with open("../logs/%s.txt" % targetAddr.split("'")[1], "w") as f:
-                    f.write(data_str)
+                    f.write(data_str.replace('\r', ""))
                 f.close()
-                
-                cmd = "echo \'" + data_str + "\' | ./script.sh"
+
+                cmd = "cat " + "../logs/%s.txt" % targetAddr.split("'")[1] + " | ./script.sh"
                 subprocess.call(cmd, shell=True)
         
             conn.close()

@@ -53,6 +53,11 @@ DEFAULT_ALLOW_RULES = [
 # Environment constants used for all instances of the chain network
 ENV_IDENTIFIERS = Identifiers(
     properties=[
+        'Windows10Pro18363', #Nov 2019
+        'Windows10Pro19041', #May 2020
+        'Windows10Pro19042', #Oct 2020
+        'Windows10Pro19043', #May 2021 (Latest)
+
         'Windows',
         'Linux',
         'ApacheWebSite',
@@ -79,6 +84,8 @@ ENV_IDENTIFIERS = Identifiers(
         'su'
     ],
     local_vulnerabilities=[
+        'ScanLSASS',
+
         'ScanBashHistory',
         'ScanExplorerRecentFiles',
         'SudoAttempt',
